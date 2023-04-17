@@ -30,13 +30,14 @@ class LeninSpider(scrapy.Spider):
                 yield scrapy.Request(url=self.domain + article['href'], callback=self.parse_article)
 
         paginator = soup.find('ul', {'class': 'paginator'})
-        active = int(paginator.find('span', {'class': 'active'}).get_text())
+        if paginator:
+            active = int(paginator.find('span', {'class': 'active'}).get_text())
 
-        max_url = paginator.find('a', {'class': 'icon'})['href']
-        max_pag = int(max_url.split('/')[-1])
-        if active < max_pag:
-            yield scrapy.Request(url=self.domain + max_url[:max_url.rfind('/') + 1] + str(active + 1),
-                                 callback=self.parse_category)
+            max_url = paginator.find('a', {'class': 'icon'})['href']
+            max_pag = int(max_url.split('/')[-1])
+            if active < max_pag:
+                yield scrapy.Request(url=self.domain + max_url[:max_url.rfind('/') + 1] + str(active + 1),
+                                     callback=self.parse_category)
 
     def parse_article(self, response, **kwargs):
         page = response.url.split("/")[-2]
